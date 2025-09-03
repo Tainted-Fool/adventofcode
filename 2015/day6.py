@@ -39,9 +39,9 @@ For example:
 """
 import re
 import numpy as np
-from typing import Tuple
+from numpy.typing import NDArray
 
-def parse_instruction(instruction: str) -> Tuple[str, slice, slice]:
+def parse_instruction(instruction: str) -> tuple[str, slice, slice]:
     """
     Parses a lighting instruction string into a command and coordinate slices
 
@@ -49,22 +49,22 @@ def parse_instruction(instruction: str) -> Tuple[str, slice, slice]:
         instruction (str): The instruction string to e.g. "turn on 0,0 through 999,999"
 
     Returns:
-        Tuple[str, slice, slice]: A tuple containing the command ("turn on", "turn off", "toggle") and two slices objects representing the x and y coordinate ranges
+        tuple[str, slice, slice]: A tuple containing the command ("turn on", "turn off", "toggle") and two slices objects representing the x and y coordinate ranges
     """
-    pattern = r'(turn on|turn off|toggle) (\d+),(\d+) through (\d+),(\d+)'
-    # pattern = r'([\w\s]+)\s(\d+),(\d+) through (\d+),(\d+)'
+    pattern = r"(turn on|turn off|toggle) (\d+),(\d+) through (\d+),(\d+)"
+    # pattern = r"([\w\s]+)\s(\d+),(\d+) through (\d+),(\d+)"
     match = re.match(pattern, instruction)
     if not match:
         raise ValueError(f"Invalid instruction: {instruction}")
     command, x0, y0, x1, y1 = match.groups()
     return command, slice(int(x0), int(x1) + 1), slice(int(y0), int(y1) + 1)
 
-def apply_part1(grid: np.ndarray, command: str, x_slice: slice, y_slice: slice) -> None:
+def apply_part1(grid: NDArray[np.bool], command: str, x_slice: slice, y_slice: slice) -> None:
     """
     Applies a light command to a boolean grid where each cell is either on or off
 
     Args:
-        grid (np.ndarray): 2D array of boolean values representing the light grid
+        grid (NDArray[np.bool]): 2D array of boolean values representing the light grid
         command (str): The command to apply ('turn on', 'turn off', 'toggle')
         x_slice (slice): Slice object for row indexing
         y_slice (slice): Slice object for column indexing
@@ -75,18 +75,18 @@ def apply_part1(grid: np.ndarray, command: str, x_slice: slice, y_slice: slice) 
     #     grid[x_slice, y_slice] = False
     # elif command == 'toggle':
     #     grid[x_slice, y_slice] = ~grid[x_slice, y_slice]
-    if command == 'toggle':
+    if command == "toggle":
         grid[x_slice, y_slice] = ~grid[x_slice, y_slice]
     else:
-        value = command == 'turn on'
+        value = command == "turn on"
         grid[x_slice, y_slice] = value
 
-def apply_part2(grid: np.ndarray, command: str, x_slice: slice, y_slice: slice) -> None:
+def apply_part2(grid: NDArray[np.integer], command: str, x_slice: slice, y_slice: slice) -> None:
     """
     Applies a light command to an integer grid where each cell can have a brightness level
 
     Args:
-        grid (np.ndarray): 2D array of integer values representing the light grid brightness
+        grid (NDArray[np.integer]): 2D array of integer values representing the light grid brightness
         command (str): The command to apply ('turn on', 'turn off', 'toggle')
         x_slice (slice): Slice object for row indexing
         y_slice (slice): Slice object for column indexing
@@ -99,21 +99,24 @@ def apply_part2(grid: np.ndarray, command: str, x_slice: slice, y_slice: slice) 
     # elif command == 'toggle':
     #     grid[x_slice, y_slice] += 2
     delta_map = {
-        'turn on': 1,
-        'turn off': -1,
-        'toggle': 2
+        "turn on": 1,
+        "turn off": -1,
+        "toggle": 2
     }
     grid[x_slice, y_slice] += delta_map[command]
-    np.maximum(grid, 0, out=grid)  # Ensure no negative values remain
-    # grid[grid < 0] = 0  # Ensure no negative brightness values
+    # np.maximum(grid, 0, out=grid)  # Ensure no negative values remain
+    grid[grid < 0] = 0  # Ensure no negative brightness values
 
 def main():
+    """
+    Main function to read the input file, parse instructions, and apply them to the grids for both parts of the problem
+    """
     filename = "day6.txt"
 
     grid_part1 = np.zeros((1000, 1000), dtype=bool)
     grid_part2 = np.zeros((1000, 1000), dtype=int)
 
-    with open(filename) as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
             command, x_slice, y_slice = parse_instruction(line)
             apply_part1(grid_part1, command, x_slice, y_slice)

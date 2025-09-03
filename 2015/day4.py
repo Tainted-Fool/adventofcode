@@ -17,9 +17,8 @@ Your puzzle input is yzbqklnj.
 Now find one that starts with six zeroes.
 """
 import hashlib
-from typing import Tuple
 
-def find_adventcoin(secret_key: str, leading_zeros: int) -> Tuple[int, str]:
+def find_adventcoin(secret_key: str, leading_zeros: int) -> tuple[int, str]:
     """
     Brute-force search for the lowest integer that, when appended to the secret key, produces an MD5 hash starting with the specified number of leading zeros
 
@@ -28,25 +27,28 @@ def find_adventcoin(secret_key: str, leading_zeros: int) -> Tuple[int, str]:
         leading_zeros (int): The number of leading zeros the hash must start with
 
     Returns:
-        Tuple[int, str]: A tuple containing the lowest number and the corresponding hash
+        tuple[int, str]: A tuple containing the lowest number and the corresponding hash
     """
     prefix = "0" * leading_zeros
     number = 1
 
     while True:
-        hash = hashlib.md5(f"{secret_key}{number}".encode()).hexdigest()
-        if hash.startswith(prefix):
-            return number, hash
+        my_hash = hashlib.md5(f"{secret_key}{number}".encode()).hexdigest()
+        if my_hash.startswith(prefix):
+            return number, my_hash
         number += 1
 
 def main():
+    """
+    Main function to find the AdventCoin for the given secret key with specified leading zeros
+    """
     secret_key = "yzbqklnj"
 
-    num, hash = find_adventcoin(secret_key, 5)
-    print(f"Part 1: number = {num}, hash = {hash}")
+    num, my_hash = find_adventcoin(secret_key, 5)
+    print(f"Part 1: number = {num}, hash = {my_hash}")
 
-    num, hash = find_adventcoin(secret_key, 6)
-    print(f"Part 2: number = {num}, hash = {hash}")
+    num, my_hash = find_adventcoin(secret_key, 6)
+    print(f"Part 2: number = {num}, hash = {my_hash}")
 
 if __name__ == "__main__":
     main()

@@ -34,24 +34,23 @@ For example, given the distances above, the longest route would be 982 via (for 
 
 What is the distance of the longest route?
 """
+import time
 import itertools
 from collections import defaultdict
-from typing import Dict, List, Tuple
-import time
 
-def calculate_route_distances(cities: List[str], distances: Dict[str, Dict[str, int]]) -> List[int]:
+def calculate_route_distances(cities: list[str], distances: dict[str, dict[str, int]]) -> list[int]:
     """
     Copmputes all possible route distances for the given cities
 
     Args:
-        cities (List[str]): List of city names
-        distance (Dict[str, Dict[str, int]]):
+        cities (list[str]): list of city names
+        distance (dict[str, dict[str, int]]):
             A dictionary mapping city pairs to their distances
 
     Returns:
-        List[int]: List of distances for all possible routes
+        list[int]: list of distances for all possible routes
     """
-    route_distances = []
+    route_distances: list[int] = []
 
     for route in itertools.permutations(cities): # O(8!) = 40320 possible routes
         total_distance = 0
@@ -65,7 +64,7 @@ def calculate_route_distances(cities: List[str], distances: Dict[str, Dict[str, 
     return route_distances
     # return [sum(distances[route[i]][route[i + 1]] for i in range(len(route) - 1)) for route in itertools.permutations(cities)]
 
-def parse_input_file(filename: str) -> Tuple[List[str], Dict[str, Dict[str, int]]]:
+def parse_input_file(filename: str) -> tuple[list[str], dict[str, dict[str, int]]]:
     """
     Reads the input file and constructs a distance mapping
 
@@ -73,13 +72,13 @@ def parse_input_file(filename: str) -> Tuple[List[str], Dict[str, Dict[str, int]
         filename (str): Path to the input file constaining city distances
 
     Returns:
-        Tuple[List[str], Dict[str, Dict[str, int]]]:
+        tuple[list[str], dict[str, dict[str, int]]]:
             A list of cities and a nested dictionary mapping city pairs to their distances
     """
-    distances = defaultdict(dict)
-    cities = set()
+    distances: dict[str, dict[str, int]] = defaultdict(dict)
+    cities: set[str] = set()
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
             connection, distance = line.strip().split(" = ")
             city1, city2 = connection.split(" to ")
@@ -89,59 +88,59 @@ def parse_input_file(filename: str) -> Tuple[List[str], Dict[str, Dict[str, int]
 
     return list(cities), distances
 
-def held_karp(cities: List[str], distances: Dict[str, Dict[str, int]], find_min: bool = True) -> int:
+def held_karp(cities: list[str], distances: dict[str, dict[str, int]], find_min: bool = True) -> int:
     """
     Solves the Traveling Salesman Problem using the Held-Karp algorithm
 
     Args:
-        cities (List[str]): List of city names
-        distances (Dict[str, Dict[str, int]]): A dictionary mapping city pairs to their distances
+        cities (list[str]): list of city names
+        distances (dict[str, dict[str, int]]): A dictionary mapping city pairs to their distances
         find_min (bool): If True, finds the shortest route; if False, finds the longest route
 
     Returns:
         int: total distance of the optimal route
     """
     n = len(cities)
-    city_index = {city: idx for idx, city in enumerate(cities)}
 
     # dp[(subset_mask, end_city)] = shortest distance to reach that subset ending at end_city
-    dp = {}
+    dp: dict[tuple[int, int], float] = {}
 
     # Initialize: only one city visited - base case
     for i in range(n):
         dp[(1 << i, i)] = 0  # Starting from city i, distance is 0
 
+    def get_initial_value() -> float:
+        return float("inf") if find_min else float("-inf")
+
+    def update_best(best: float, new_dist: float) -> float:
+        return min(best, new_dist) if find_min else max(best, new_dist)
+
     # Iterate over subsets of increasing size
     for subset_size in range(2, n + 1):
         for subset in itertools.combinations(range(n), subset_size):
             mask = sum(1 << i for i in subset)
-            for j in subset:
-                prev_mask = mask ^ (1 << j)
-                min_dist = float('inf')
-                best = float('inf') if find_min else float('-inf')
+            for end in subset:
+                prev_mask = mask ^ (1 << end)
+                best = get_initial_value()
 
                 for k in subset:
-                    if k == j:
+                    if k == end:
                         continue
-                    city_from = cities[k]
-                    city_to = cities[j]
-                    prev_dist = dp.get((prev_mask, k), float('inf') if find_min else float('-inf'))
-                    step_dist = distances[city_from][city_to]
-                    new_dist = prev_dist + step_dist
+                    prev_dist = dp.get((prev_mask, k), get_initial_value())
+                    step_dist = distances[cities[k]][cities[end]]
+                    best = update_best(best, prev_dist + step_dist)
 
-                    if find_min:
-                        best = min(best, new_dist)
-                    else:
-                        best = max(best, new_dist)
-
-                dp[(mask, j)] = best
+                dp[(mask, end)] = best
 
     # Close the loop: find shortest path visiting all cities
     full_mask = (1 << n) - 1
-    all_final_dists = [dp[(full_mask, j)] for j in range(n)]
-    return min(all_final_dists) if find_min else max(all_final_dists)
+    final_dists = [dp[(full_mask, j)] for j in range(n)]
+    return int(min(final_dists)) if find_min else int(max(final_dists))
 
 def main():
+    """
+    Main function to execute the solution for Day 9 of Advent of Code 2015
+    """
     filename = "day9.txt"
 
     start = time.perf_counter()

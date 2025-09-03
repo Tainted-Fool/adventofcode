@@ -56,14 +56,13 @@ Now, what is the quantum entanglement of the first group of packages in the idea
 """
 from itertools import combinations
 from math import prod
-from typing import List
 
-def find_min_quantum_entanglement(weights: List[int], num_groups: int) -> int:
+def find_min_quantum_entanglement(weights: list[int], num_groups: int) -> int:
     """
     Find the minimum quantum entanglement for group of packages
 
     Args:
-        weights (List[int]): List of package weights
+        weights (list[int]): list of package weights
         num_groups (int): Number of groups to split the packages into
 
     Returns:
@@ -72,11 +71,12 @@ def find_min_quantum_entanglement(weights: List[int], num_groups: int) -> int:
     target_weight = sum(weights) // num_groups
 
     for group_size in range(1, len(weights) + 1):
-        valid_combos = [prod(combo) for combo in combinations(weights, group_size) if sum(combo) == target_weight]
+        valid_combos = [combo for combo in combinations(weights, group_size) if sum(combo) == target_weight]
         if valid_combos:
-            return min(valid_combos)
+            return min(prod(combo) for combo in valid_combos)
+    return -1
 
-def parse_data(filename: str) -> List[int]:
+def parse_data(filename: str) -> list[int]:
     """
     Parse the input data from a file and return a list of integers
 
@@ -84,12 +84,15 @@ def parse_data(filename: str) -> List[int]:
         filename (str): Name of the file containing package weights
 
     Returns:
-        List[int]: List of package weights
+        list[int]: list of package weights
     """
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         return [int(line) for line in file if line.strip()]
 
 def main():
+    """
+    Main function to execute the solution for Day 24
+    """
     filename = "day24.txt"
     weights = parse_data(filename)
 

@@ -63,7 +63,7 @@ def iterate_look_and_say(sequence: str, iterations: int) -> str:
         str: The final sequence after the specified number of iterations
     """
     for _ in range(iterations):
-        output = []
+        output: list[str] = []
         for digit, group in groupby(sequence):
             output.append(str(len(list(group))) + digit)
         sequence = ''.join(output)
@@ -72,8 +72,11 @@ def iterate_look_and_say(sequence: str, iterations: int) -> str:
     # return sequence
 
 def main():
-    input = "1321131112"
-    answer = look_and_say(input, 40)
+    """
+    Main function to run the look-and-say process for the given puzzle input
+    """
+    puzzle_input = "1321131112"
+    answer = look_and_say(puzzle_input, 40)
     print(f"Part 1: {len(answer)}")
 
     answer = iterate_look_and_say(answer, 10)

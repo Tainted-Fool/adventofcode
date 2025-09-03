@@ -55,9 +55,12 @@ def count_houses(directions: str, number_deliverers: int = 1) -> int:
     return len(visited_houses)
 
 def main():
+    """
+    Main function to read input and calculate the number of unique houses visited
+    """
     filename = "day3.txt"
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         directions = file.read()
 
     unique_houses = count_houses(directions)

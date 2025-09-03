@@ -41,9 +41,10 @@ import re
 from itertools import product
 from functools import reduce
 from operator import mul
-from typing import List, Tuple, Generator
+from collections.abc import Generator
+from typing import cast
 
-def parse_data(filename: str) -> List[List[int]]:
+def parse_data(filename: str) -> list[list[int]]:
     """
     Parses the input file and returns a list of tuples containing ingredient properties
 
@@ -51,27 +52,27 @@ def parse_data(filename: str) -> List[List[int]]:
         filename (str): The name of the input file
 
     Returns:
-        List[List[int]]: A list of ingredient properties, each containing capacity, durability, flavor, texture, but not calories of an ingredient
+        list[list[int]]: A list of ingredient properties, each containing capacity, durability, flavor, texture, but not calories of an ingredient
     """
-    ingredients = []
+    ingredients: list[list[int]] = []
     pattern = re.compile(r"-?\d+")
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
             properties = list(map(int, pattern.findall(line)))
             ingredients.append(properties)
     return ingredients
 
-def calculate_score(ingredients: List[List[int]], amounts: Tuple[int]) -> Tuple[int, int]:
+def calculate_score(ingredients: list[list[int]], amounts: tuple[int, ...]) -> tuple[int, int]:
     """
     Given a tuple of ingredient amounts and a list of igredent properties, calculates the score and calorie count of the cookie
 
     Args:
-        ingredients (List[List[int]]): A list containing properties of an ingredient
-        amounts (Tuple[int]): A tuple containing the amounts of each ingredient
+        ingredients (list[list[int]]): A list containing properties of an ingredient
+        amounts (tuple[int, ...]): A tuple containing the amounts of each ingredient
 
     Returns:
-        Tuple[int, int]: A tuple containing the total score and calorie count of the cookie
+        tuple[int, int]: A tuple containing the total score and calorie count of the cookie
     """
     totals = [0, 0, 0, 0]  # capacity, durability, flavor, texture
     total_calories = 0
@@ -82,11 +83,11 @@ def calculate_score(ingredients: List[List[int]], amounts: Tuple[int]) -> Tuple[
         total_calories += amount * ingredient[4]
 
     totals = [max(0, total) for total in totals]  # Ensure no negative totals
-    total_score = reduce(mul, totals)
+    total_score = cast(int, reduce(mul, totals))
 
     return total_score, total_calories
 
-def generate_combinations(ingredient_count: int, total_amount: int = 100) -> Tuple[int]:
+def generate_combinations(ingredient_count: int, total_amount: int = 100) -> Generator[tuple[int, ...]]:
     """
     Generates all combinations of ingredient amounts that sum to `total_amount`
     Assume exactly 4 ingredients for simplicity
@@ -96,15 +97,16 @@ def generate_combinations(ingredient_count: int, total_amount: int = 100) -> Tup
         total_amount (int): The total amount of ingredients to use, default is 100
 
     Returns:
-        Tuple[int]: A tuple, each containing amounts of each ingredient that sum to `total_amount`
+        Generator[tuple[int, ...]]: A tuple, each containing amounts of each ingredient that sum to `total_amount`
     """
+    assert ingredient_count == 4, "This function is designed for exactly 4 ingredients"
     for a in range(total_amount + 1):
         for b in range(total_amount - a + 1):
             for c in range(total_amount - a - b + 1):
                 d = total_amount - a - b - c
                 yield (a, b, c, d)
 
-def generate_products(ingredient_count: int, total_amount: int = 100) -> Tuple[int]:
+def generate_products(ingredient_count: int, total_amount: int = 100) -> Generator[tuple[int, ... ]]:
     """
     Generates all combinations of ingredient amounts that sum to `total_amount` using product
     Args:
@@ -112,13 +114,13 @@ def generate_products(ingredient_count: int, total_amount: int = 100) -> Tuple[i
         total_amount (int): The total amount of ingredients to use, default is 100
 
     Returns:
-        Tuple[int]: A tuple, each containing amounts of each ingredient that sum to `total_amount`
+        Generator[tuple[int]]: A tuple, each containing amounts of each ingredient that sum to `total_amount`
     """
     for combo in product(range(total_amount + 1), repeat=ingredient_count):
         if sum(combo) == total_amount:
             yield combo
 
-def recursive_generate(ingredient_count: int, total_amount: int = 100) -> Generator[Tuple[int, ...], None, None]:
+def recursive_generate(ingredient_count: int, total_amount: int = 100) -> Generator[tuple[int, ...], None, None]:
     """
     Recrsively generates all combinations of integers that sum to `total_amount`
 
@@ -127,7 +129,7 @@ def recursive_generate(ingredient_count: int, total_amount: int = 100) -> Genera
         total_amount (int): The target sum
 
     Yields:
-        Tuple[int, ...]: A combination of integers summing to `total_amount`
+        Generator[tuple[int, ...]]: A combination of integers summing to `total_amount`
     """
     if ingredient_count == 1:
         yield (total_amount,)
@@ -136,16 +138,16 @@ def recursive_generate(ingredient_count: int, total_amount: int = 100) -> Genera
             for rest in recursive_generate(ingredient_count - 1, total_amount - i):
                 yield (i,) + rest
 
-def recursive_score(ingredients: List[List[int]], amounts: Tuple[int, ...]) -> Tuple[int, int]:
+def recursive_score(ingredients: list[list[int]], amounts: tuple[int, ...]) -> tuple[int, int]:
     """
     Computes the score and calorie count for a given combination of ingredient amount
 
     Args:
-        ingredients (List[List[int]]): A list of ingredient properties
-        amounts (Tuple[int, ...]): A tuple containing the amounts of each ingredient
+        ingredients (list[list[int]]): A list of ingredient properties
+        amounts (tuple[int, ...]): A tuple containing the amounts of each ingredient
 
     Returns:
-        Tuple[int, int]: A tuple containing the total score and calorie count of the recipe
+        tuple[int, int]: A tuple containing the total score and calorie count of the recipe
     """
     num_properties = len(ingredients[0])
     property_totals = [0] * num_properties
@@ -165,7 +167,10 @@ def recursive_score(ingredients: List[List[int]], amounts: Tuple[int, ...]) -> T
     return score, calories
 
 def main():
-    filename = 'day15.txt'
+    """
+    Main function to execute the solution for Day 15 of Advent of Code 2015
+    """
+    filename = "day15.txt"
     ingredients = parse_data(filename)
     part1 = part2 = 0
 
@@ -178,8 +183,8 @@ def main():
             part2 = max(part2, score)
         part1 = max(part1, score)
 
-    print(f'Part 1: {part1}')
-    print(f'Part 2: {part2}')
+    print(f"Part 1: {part1}")
+    print(f"Part 2: {part2}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

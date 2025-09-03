@@ -1,0 +1,7 @@
+[tool.pylint]
+disable = [
+  "line-too-long",
+  "missing-module-docstring",
+  "too-many-instance-attributes",
+  "too-many-locals",
+]

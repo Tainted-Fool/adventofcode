@@ -57,9 +57,9 @@ What is the most amount of gold you can spend and still lose the fight?
 """
 import itertools
 import math
-from typing import List, Tuple
+from collections.abc import Generator
 
-def shop_items() -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]], List[Tuple[int, int, int]]]:
+def shop_items() -> tuple[list[tuple[int, int, int]], list[tuple[int, int, int]], list[tuple[int, int, int]]]:
     """
     Returns a tuple of lists containing the items available in the shop
 
@@ -67,10 +67,10 @@ def shop_items() -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]]
         None
 
     Returns:
-        Tuple containing three lists:
-            - Weapons: List of tuples (cost, damage, armor)
-            - Armor: List of tuples (cost, damage, armor)
-            - Rings: List of tuples (cost, damage, armor)
+        tuple containing three lists:
+            - Weapons: list of tuples (cost, damage, armor)
+            - Armor: list of tuples (cost, damage, armor)
+            - Rings: list of tuples (cost, damage, armor)
     """
     weapons = [
         (8, 4, 0),  # Dagger
@@ -100,7 +100,7 @@ def shop_items() -> Tuple[List[Tuple[int, int, int]], List[Tuple[int, int, int]]
     ]
     return weapons, armor, rings
 
-def fight(player_hp: int, player_damage: int, player_armor: int, boss_hp: int, boss_damage: int, boss_armor: int) -> bool:
+def fight(player_hp: int, player_damage: int, player_armor: int) -> bool:
     """
     Simulates a fight between the player and the boss - turn based combat
 
@@ -108,13 +108,12 @@ def fight(player_hp: int, player_damage: int, player_armor: int, boss_hp: int, b
         player_hp (int): Player's hit points
         player_damage (int): Player's damage score
         player_armor (int): Player's armor score
-        boss_hp (int): Boss's hit points
-        boss_damage (int): Boss's damage score
-        boss_armor (int): Boss's armor score
 
     Returns:
         bool: True if the player wins, False if the player loses
     """
+    boss_hp, boss_damage, boss_armor = 100, 8, 2  # from puzzle input
+
     while True:
         boss_hp -= max(player_damage - boss_armor, 1)
         if boss_hp <= 0:
@@ -124,7 +123,7 @@ def fight(player_hp: int, player_damage: int, player_armor: int, boss_hp: int, b
         if player_hp <= 0:
             return False
 
-def all_loadouts() -> List[Tuple[int, int, int]]:
+def all_loadouts() -> Generator[tuple[int, int, int]]:
     """
     Generates all possible loadouts of items from the shop
 
@@ -132,7 +131,7 @@ def all_loadouts() -> List[Tuple[int, int, int]]:
         None
 
     Returns:
-        List[Tuple[int, int, int]]: List of tuples containing (cost, total_damage, total_armor) for each loadout
+        Generator[tuple[int, int, int]]: Generator of tuples containing (cost, total_damage, total_armor) for each loadout
     """
     weapons, armor, rings = shop_items()
 
@@ -144,7 +143,7 @@ def all_loadouts() -> List[Tuple[int, int, int]]:
                 total_armor = weapon_armor + armor_armor + ring1[2] + ring2[2]
                 yield total_cost, total_damage, total_armor
 
-def solve() -> Tuple[int, int]:
+def solve() -> tuple[int, int]:
     """
     Solves the puzzle by finding the minimum cost to win and maximum cost to lose
 
@@ -152,21 +151,19 @@ def solve() -> Tuple[int, int]:
         None
 
     Returns:
-        Tuple[int, int]: Minimum cost to win, Maximum cost to lose
+        tuple[int, int]: Minimum cost to win, Maximum cost to lose
     """
-    boss_hp, boss_damage, boss_armor = 100, 8, 2  # from puzzle input
-    min_win_cost = float('inf')
-    max_loss_cost = 0
+    min_win_cost, max_loss_cost = 0, 0
 
     for cost, damage, armor in all_loadouts():
-        player_wins = fight(100, damage, armor, boss_hp, boss_damage, boss_armor)
-        if player_wins:
+        wins = fight(100, damage, armor)
+        if wins:
             min_win_cost = min(min_win_cost, cost)
         else:
             max_loss_cost = max(max_loss_cost, cost)
     return min_win_cost, max_loss_cost
 
-def loadouts() -> List[Tuple[int, int, int]]:
+def loadouts() -> list[tuple[int, int, int]]:
     """
     Generates all possible loadouts of items from the shop, including combinations of rings
 
@@ -174,10 +171,10 @@ def loadouts() -> List[Tuple[int, int, int]]:
         None
 
     Returns:
-        List[Tuple[int, int, int]]: List of tuples containing (cost, total_damage, total_armor) for each loadout
+        list[tuple[int, int, int]]: list of tuples containing (cost, total_damage, total_armor) for each loadout
     """
     weapons, armors, rings = shop_items()
-    builds = []
+    builds: list[tuple[int, int, int]] = []
 
     for weapon in weapons:
         for armor in armors:
@@ -207,7 +204,7 @@ def player_wins(player_damage: int, player_armor: int, boss_hp: int, boss_damage
     turns_boss = math.ceil(100 / max(boss_damage - player_armor, 1))
     return turns_player <= turns_boss
 
-def solve2() -> Tuple[int, int]:
+def solve2() -> tuple[int, int]:
     """
     Solves the puzzle by finding the minimum cost to win and maximum cost to lose using the loadouts function
 
@@ -215,9 +212,10 @@ def solve2() -> Tuple[int, int]:
         None
 
     Returns:
-        Tuple[int, int]: Minimum cost to win, Maximum cost to lose
+        tuple[int, int]: Minimum cost to win, Maximum cost to lose
     """
     boss_hp, boss_damage, boss_armor = 100, 8, 2  # from puzzle input
+    best_price_to_win, worst_price_to_lose = 0, 0
     builds = loadouts()
 
     for cost, damage, armor in sorted(builds, key=lambda x: x[0]):
@@ -232,6 +230,9 @@ def solve2() -> Tuple[int, int]:
     return best_price_to_win, worst_price_to_lose
 
 def main():
+    """
+    Main function to execute the solution and print results
+    """
     # part1, part2 = solve()
     # print(f"Part 1: {part1}")
     # print(f"Part 2: {part2}")

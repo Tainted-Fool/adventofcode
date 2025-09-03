@@ -30,10 +30,9 @@ Again given the descriptions of each reindeer (in your puzzle input), after exac
 """
 import re
 from itertools import cycle, accumulate
-from collections import defaultdict, Counter
-from typing import Dict, List
+from collections import Counter
 
-def parse_data(filename: str, race_duration: int) -> Dict[str, List[int]]:
+def parse_data(filename: str, race_duration: int) -> dict[str, list[int]]:
     """
     Parse the input file and returns cumlative distances for each reindeer over time
 
@@ -42,14 +41,19 @@ def parse_data(filename: str, race_duration: int) -> Dict[str, List[int]]:
         race_duration (int): The total time
 
     Returns:
-        Dict[str, List[int]]: A dictionary where keys are reindeer names and values are lists of cumulative distances
+        dict[str, list[int]]: A dictionary where keys are reindeer names and values are lists of cumulative distances
     """
     pattern = re.compile(r"(\w+) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds.")
-    race_data = defaultdict(list)
+    # race_data = defaultdict(list)
+    race_data: dict[str, list[int]] = {}
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
-            name, speed, fly_time, rest_time = pattern.match(line).groups()
+            match = pattern.match(line)
+            if not match:
+                continue
+
+            name, speed, fly_time, rest_time = match.groups()
             speed, fly_time, rest_time = map(int, (speed, fly_time, rest_time))
             movement = cycle([speed] * fly_time + [0] * rest_time)  # create repeating pattern
             # distances = []
@@ -61,46 +65,54 @@ def parse_data(filename: str, race_duration: int) -> Dict[str, List[int]]:
             race_data[name] = distances
     return race_data
 
-def calculate_distance(race_data: Dict[str, List[int]]) -> int:
+def calculate_distance(race_data: dict[str, list[int]]) -> int:
     """
     Calculate the distance traveled by the reindeer
 
     Args:
-        race_data (Dict[str, List[int]]): A dictionary where keys are reindeer names and values are lists of cumulative distances
+        race_data (dict[str, list[int]]): A dictionary where keys are reindeer names and values are lists of cumulative distances
 
     Returns:
         int: The maximum distance traveled by any reindeer
     """
     return max(distances[-1] for distances in race_data.values())
 
-def calculate_points(race_data: Dict[str, List[int]]) -> int:
+def calculate_points(race_data: dict[str, list[int]]) -> int:
     """
     Calculate the most points scored by any reindeer
 
     Args:
-        race_data (Dict[str, List[int]]): A dictionary where keys are reindeer names and values are lists of cumulative distances
+        race_data (dict[str, list[int]]): A dictionary where keys are reindeer names and values are lists of cumulative distances
 
     Returns:
         int: The maximum points scored by any reindeer
     """
-    points = Counter()
+    points: Counter[str] = Counter()
+    reindeer_names = list(race_data.keys())
 
+    # for second in zip(*race_data.values()):
+    #     leaders = [i for i, distance in enumerate(second) if distance == max(second)]
+    #     points.update(leaders)
+    # return max(points.values())
+
+    second: tuple[int, ...]  # Ensure second is a tuple of distances
     for second in zip(*race_data.values()):
-        leaders = [i for i, distance in enumerate(second) if distance == max(second)]
-        points.update(leaders)
+        for i, distance in enumerate(second):
+            if distance == max(second):
+                points[reindeer_names[i]] += 1
     return max(points.values())
 
-def calculate_max_points(race_data: Dict[str, List[int]]) -> int:
+def calculate_max_points(race_data: dict[str, list[int]]) -> int:
     """
     Calculate the most points scored by any reindeer
 
     Args:
-        race_data (Dict[str, List[int]]): A dictionary where keys are reindeer names and values are lists of cumulative distances
+        race_data (dict[str, list[int]]): A dictionary where keys are reindeer names and values are lists of cumulative distances
 
     Returns:
         int: The maximum points scored by any reindeer
     """
-    points = Counter()
+    points: Counter[str] = Counter()
     total_seconds = len(next(iter(race_data.values())))
 
     for second in range(total_seconds):
@@ -117,6 +129,9 @@ def calculate_max_points(race_data: Dict[str, List[int]]) -> int:
     return max(points.values())
 
 def main():
+    """
+    Main function to execute the solution for the Reindeer Olympics problem
+    """
     filename = "day14.txt"
     race_data = parse_data(filename, 2503)
 

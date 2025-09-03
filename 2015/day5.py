@@ -52,7 +52,7 @@ def is_nice(word: str) -> bool:
     Returns:
         bool: True if the word is nice, False otherwise
     """
-    vowels = ['a', 'e', 'i', 'o', 'u']
+    vowels = ["a", "e", "i", "o", "u"]
     vowel_count = 0
     for char in word:
         if char in vowels:
@@ -68,7 +68,7 @@ def is_nice(word: str) -> bool:
     if not has_double_letter:
         return False
 
-    disallowed = ['ab', 'cd', 'pq', 'xy']
+    disallowed = ["ab", "cd", "pq", "xy"]
     for bad in disallowed:
         if bad in word:
             return False
@@ -87,7 +87,7 @@ def is_nice_two(word: str) -> bool:
         bool: True if the word is nice, False otherwise
     """
     has_pair_twice = False
-    pairs = {}
+    pairs: dict[str, int] = {}
     for i in range(len(word) - 1):
         pair = word[i:i + 2]
         if pair in pairs:
@@ -123,10 +123,10 @@ def is_nice_regex(word: str) -> bool:
 
     # (.) captures any character
     # \1 matches the same character again
-    if not re.search(r'(.)\1', word):
+    if not re.search(r"(.)\1", word):
         return False
 
-    if re.search(r'ab|cd|pq|xy', word):
+    if re.search(r"ab|cd|pq|xy", word):
         return False
     return True
 
@@ -146,13 +146,13 @@ def is_nice_two_regex(word: str) -> bool:
     # (..) captures any two characters
     # .* matches any characters in between
     # \1 matches the same two characters again
-    if not re.search(r'(?=(..).*\1)', word):
+    if not re.search(r"(?=(..).*\1)", word):
         return False
 
     # (.) captures any character
     # . matches any character or skips one
     # \1 matches the same character again
-    if not re.search(r'(.).\1', word):
+    if not re.search(r"(.).\1", word):
         return False
     return True
 
@@ -190,10 +190,13 @@ def is_nice_two_simple(word: str) -> bool:
     return has_pair_twice and has_repeat_with_gap
 
 def main():
+    """
+    Main function to read the input file and count nice strings
+    """
     filename = "day5.txt"
     count = count2 = 0
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
             if is_nice(line):
             # if is_nice_regex(line):

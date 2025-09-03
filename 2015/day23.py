@@ -30,15 +30,14 @@ What is the value in register b when the program in your puzzle input is finishe
 The unknown benefactor is very thankful for releasi-- er, helping little Jane Marie with her computer. Definitely not to distract you, what is the value in register b after the program is finished executing if register a starts as 1 instead?
 """
 import re
-from typing import Dict, List, Tuple
 
-def execute_program(registers: Dict[str, int], instructions: List[Tuple[str, str, str]]) -> int:
+def execute_program(registers: dict[str, int], instructions: list[tuple[str, str, str]]) -> int:
     """
     Execute the instructions on the registers and return the value in register 'b'
 
     Args:
-        registers (Dict[str, int]): A dictionary containing the initial values of registers 'a' and 'b'
-        instructions (List[Tuple[str, str, str]]): A list of instructions to execute
+        registers (dict[str, int]): A dictionary containing the initial values of registers 'a' and 'b'
+        instructions (list[tuple[str, str, str]]): A list of instructions to execute
 
     Returns:
         int: The value in register 'b' after executing all instructions
@@ -63,10 +62,12 @@ def execute_program(registers: Dict[str, int], instructions: List[Tuple[str, str
             case "jio":
                 if registers[x] == 1:
                     pointer += int(y) - 1
+            case _:
+                raise ValueError(f"Unknown operation: {op}")
         pointer += 1
     return registers["b"]
 
-def parse_data(filename: str) -> List[Tuple[str, str, str]]:
+def parse_data(filename: str) -> list[tuple[str, str, str]]:
     """
     Parse the input file and return a list of instructions
 
@@ -74,15 +75,18 @@ def parse_data(filename: str) -> List[Tuple[str, str, str]]:
         filename (str): The name of the input file
 
     Returns:
-        List[Tuple[str, str, str]]: A list of instructions where each instruction is
+        list[tuple[str, str, str]]: A list of instructions where each instruction is
     """
-    with open(filename, "r") as file:
-        input = file.read().strip()
+    with open(filename, "r", encoding="utf-8") as file:
+        data = file.read().strip()
 
     pattern = r"(\w+) (\S+)(?:, (\S+))?$"
-    return re.findall(pattern, input, re.M)
+    return re.findall(pattern, data, re.M)
 
 def main():
+    """
+    Main function to execute the program with the provided input file
+    """
     filename = "day23.txt"
     instructions = parse_data(filename)
 

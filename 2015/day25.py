@@ -91,12 +91,14 @@ def find_code_at_position(row: int, column: int) -> int:
     """
     code = 20151125 # initial code from data
     index = get_code_index(row, column)
-    # for _ in range(index - 1):
-    for _ in range(1, index):
+    for _ in range(index - 1):
         code = compute_next_code(code)
     return code
 
 def main():
+    """
+    Main function to execute the code finding process
+    """
     target_row, target_column = 2981, 3075 # puzzle input
 
     print(f"Merry Christmas: {find_code_at_position(target_row, target_column)}")

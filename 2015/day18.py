@@ -127,10 +127,11 @@ After 5 steps, this example now has 17 lights on.
 
 In your grid of 100x100 lights, given your initial configuration, but with the four corners always in the on state, how many lights are on after 100 steps?
 """
+from typing import cast
 import numpy as np
-from typing import List, Tuple
+from numpy.typing import NDArray
 
-def parse_data(filename: str) -> List[List[int]]:
+def parse_data(filename: str) -> list[list[int]]:
     """
     Reads the input file and converts it into a 2D list of integers
 
@@ -138,12 +139,12 @@ def parse_data(filename: str) -> List[List[int]]:
         filename (str): The name of the input file
 
     Returns:
-        List[List[int]]: A 2D list where each element is either 0 (off) or 1 (on)
+        list[list[int]]: A 2D list where each element is either 0 (off) or 1 (on)
     """
-    grid = []
-    with open(filename, "r") as file:
+    grid: list[list[int]] = []
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
-            row = []
+            row: list[int] = []
             for char in line.strip():
                 if char == "#":
                     row.append(1)
@@ -152,7 +153,7 @@ def parse_data(filename: str) -> List[List[int]]:
             grid.append(row)
     return grid
 
-def parse_data2(filename: str) -> List[List[int]]:
+def parse_data2(filename: str) -> list[list[int]]:
     """
     Reads the input file and converts it into a 2D list of integers
 
@@ -160,18 +161,18 @@ def parse_data2(filename: str) -> List[List[int]]:
         filename (str): The name of the input file
 
     Returns:
-        List[List[int]]: A 2D list where each element is either 0 (off) or 1 (on)
+        list[list[int]]: A 2D list where each element is either 0 (off) or 1 (on)
     """
     convert = {"#": 1, ".": 0}
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         return [[convert[char] for char in line.strip()] for line in file]
 
-def count_on_neighbours(grid: List[List[int]], row: int, col: int) -> int:
+def count_on_neighbours(grid: list[list[int]], row: int, col: int) -> int:
     """
     Return how many of the eight neighbours of a cell are on
 
     Args:
-        grid (List[List[int]]): The 2D grid of lights
+        grid (list[list[int]]): The 2D grid of lights
         row (int): The row index of the cell
         col (int): The column index of the cell
 
@@ -194,16 +195,16 @@ def count_on_neighbours(grid: List[List[int]], row: int, col: int) -> int:
                 total += grid[new_row][new_col]
     return total
 
-def next_grid_state(current: List[List[int]], pin_corners: bool = False) -> List[List[int]]:
+def next_grid_state(current: list[list[int]], pin_corners: bool = False) -> list[list[int]]:
     """
     Compute the grid state for the next step based on the current state
 
     Args:
-        current (List[List[int]]): The current state of the grid
+        current (list[list[int]]): The current state of the grid
         pin_corners (bool): If True, the corners will always be on
 
     Returns:
-        List[List[int]]: The next state of the grid
+        list[list[int]]: The next state of the grid
     """
     rows = len(current)
     cols = len(current[0])
@@ -221,7 +222,7 @@ def next_grid_state(current: List[List[int]], pin_corners: bool = False) -> List
 
             if current[i][j] == 1:
                 # a lit cell stays on with 2 or 3 neighbours
-                if neighbours == 2 or neighbours == 3:
+                if neighbours in (2, 3):
                     new_grid[i][j] = 1
             else:
                 # An unlit cell turns on with exactly 3 neighbours
@@ -229,17 +230,17 @@ def next_grid_state(current: List[List[int]], pin_corners: bool = False) -> List
                     new_grid[i][j] = 1
     return new_grid
 
-def run_simulation(start: List[List[int]], steps: int, pin_corners: bool = False) -> List[List[int]]:
+def run_simulation(start: list[list[int]], steps: int, pin_corners: bool = False) -> list[list[int]]:
     """
     Run the simulation for `steps` iterations and returns the final grid
 
     Args:
-        start (List[List[int]]): The initial state of the grid
+        start (list[list[int]]): The initial state of the grid
         steps (int): The number of steps to simulate
         pin_corners (bool): If True, the corners will always be on
 
     Returns:
-        List[List[int]]: The final state of the grid after `steps` iterations
+        list[list[int]]: The final state of the grid after `steps` iterations
     """
     # Create a copy of the initial grid
     grid = [row[:] for row in start]
@@ -255,12 +256,12 @@ def run_simulation(start: List[List[int]], steps: int, pin_corners: bool = False
 
     return grid
 
-def count_lights_on(grid: List[List[int]]) -> int:
+def count_lights_on(grid: list[list[int]]) -> int:
     """
     Count how many lights are on in the grid
 
     Args:
-        grid (List[List[int]]): The grid to count lights in
+        grid (list[list[int]]): The grid to count lights in
 
     Returns:
         int: The total number of lights that are on
@@ -272,15 +273,15 @@ def count_lights_on(grid: List[List[int]]) -> int:
     return total
     # return sum(sum(row) for row in grid)
 
-def numpy_count(grid: np.ndarray) -> np.ndarray:
+def numpy_count(grid: NDArray[np.uint8]) -> NDArray[np.uint8]:
     """
     Return an array with the number of on neighbours for each cell
 
     Args:
-        grid (np.ndarray): The current state of the grid as a numpy array
+        grid (NDArray[np.uint8]): The current state of the grid as a numpy array
 
     Returns:
-        np.ndarray: A numpy array with the count of neighbours that are on
+        NDArray[np.uint8]: A numpy array with the count of neighbours that are on
     """
     pad = np.pad(grid, 1)  # zero-padd all around
     return (
@@ -289,20 +290,20 @@ def numpy_count(grid: np.ndarray) -> np.ndarray:
         pad[2:, 0:-2] + pad[2:, 1:-1] + pad[2:, 2:]
     )
 
-def numpy_step(grid: np.ndarray, pin_corners: bool = False) -> np.ndarray:
+def numpy_step(grid: NDArray[np.uint8], pin_corners: bool = False) -> NDArray[np.uint8]:
     """
     Perform a single step of the simulation using numpy
 
     Args:
-        grid (np.ndarray): The current state of the grid as a numpy array
+        grid (NDArray[np.uint8]): The current state of the grid as a numpy array
         pin_corners (bool): If True, the corners will always be on
 
     Returns:
-        np.ndarray: The next state of the grid after applying the rules
+        NDArray[np.uint8]: The next state of the grid after applying the rules
     """
     n = numpy_count(grid)
-    stay_on = (grid == 1) & ((n == 2) | (n == 3))
-    turn_on = (grid == 0) & (n == 3)
+    stay_on = cast(NDArray[np.bool], (grid == 1) & ((n == 2) | (n == 3)))
+    turn_on = cast(NDArray[np.bool], (grid == 0) & (n == 3))
     next_grid = (stay_on | turn_on).astype(np.uint8)
 
     if pin_corners:
@@ -311,7 +312,7 @@ def numpy_step(grid: np.ndarray, pin_corners: bool = False) -> np.ndarray:
         next_grid[rows - 1, 0] = next_grid[rows - 1, cols - 1] = 1
     return next_grid
 
-def numpy_run(filename: str, steps: int) -> Tuple[int, int]:
+def numpy_run(filename: str, steps: int) -> tuple[int, int]:
     """
     Run the simulation using numpy for `steps` iterations and returns the count of lights on
 
@@ -322,7 +323,15 @@ def numpy_run(filename: str, steps: int) -> Tuple[int, int]:
     Returns:
         int: The total number of lights that are on after `steps` iterations
     """
-    grid = np.array([[c == "#" for c in line.strip()] for line in open(filename)], np.uint8)
+    # grid = np.array([[c == "#" for c in line.strip()] for line in open(filename, "r", encoding="utf-8")], np.uint8)
+    bool_grid: list[list[bool]] = []
+    with open(filename, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            bool_row = [c == "#" for c in line]
+            bool_grid.append(bool_row)
+    grid = np.array(bool_grid, dtype=np.uint8)
+
     grid1 = grid.copy()
     grid2 = grid.copy()
     grid2[0, 0] = grid2[0, -1] = grid2[-1, 0] = grid2[-1, -1] = 1
@@ -334,9 +343,12 @@ def numpy_run(filename: str, steps: int) -> Tuple[int, int]:
     return grid1.sum(), grid2.sum()
 
 def main():
+    """
+    Main function to read the input file, parse instructions, and apply them to the grids for both parts of the problem
+    """
     filename = "day18.txt"
     # initial_grid = parse_data(filename)
-    initial_grid = parse_data2(filename)
+    # initial_grid = parse_data2(filename)
     steps_to_run = 100
 
     # print(f"Part 1: {count_lights_on(run_simulation(initial_grid, steps_to_run))}")

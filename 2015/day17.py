@@ -21,9 +21,8 @@ Find the minimum number of containers that can exactly fit all 150 liters of egg
 In the example above, the minimum number of containers was two. There were three ways to use that many containers, and so the answer there would be 3.
 """
 from itertools import combinations
-from typing import List, Tuple
 
-def parse_data(filename: str) -> List[int]:
+def parse_data(filename: str) -> list[int]:
     """
     Returns a list of container sizes from the input file
 
@@ -31,26 +30,26 @@ def parse_data(filename: str) -> List[int]:
         filename (str): The name of the input file
 
     Returns:
-        List[int]: A list of integers representing the sizes of the containers
+        list[int]: A list of integers representing the sizes of the containers
     """
-    containers = []
-    with open(filename, "r") as file:
+    containers: list[int] = []
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
             containers.append(int(line.strip()))
         return containers
         # return [int(line.strip()) for line in file]
 
-def count_valid_combos(sizes: List[int], target: int) -> Tuple[int, int]:
+def count_valid_combos(sizes: list[int], target: int) -> tuple[int, int]:
     """
     Counts all combinations that sums to `target`
     Counts all combinations that use the minimun number of containers
 
     Args:
-        sizes (List[int]): List of container sizes
+        sizes (list[int]): list of container sizes
         target (int): The target sum to achieve with the combinations
 
     Returns:
-        Tuple[int, int]: A tuple containing the count of all valid combinations and the count of combinations using the minimum number of containers
+        tuple[int, int]: A tuple containing the count of all valid combinations and the count of combinations using the minimum number of containers
     """
     total_valid = 0
     min_size = None
@@ -69,6 +68,9 @@ def count_valid_combos(sizes: List[int], target: int) -> Tuple[int, int]:
     return total_valid, combos_with_min_size
 
 def main():
+    """
+    Main function to execute the solution for the problem
+    """
     filename = "day17.txt"
     target_volume = 150
 

@@ -120,19 +120,8 @@ With the same starting stats for you and the boss, what is the least amount of m
 """
 import sys
 import copy
-from typing import Dict, List, TypedDict
 
-class Spell(TypedDict):
-    cost: int
-    damage: int
-    heal: int
-    armor: int
-    mana: int
-    duration: int
-
-# Spellbook = Dict[str, Spell]
-
-def get_spells() -> Dict[str, Dict[str, int]]:
+def get_spells() -> dict[str, dict[str, int]]:
     """
     Returns a dictionary of spells with their properties
 
@@ -140,7 +129,7 @@ def get_spells() -> Dict[str, Dict[str, int]]:
         None
 
     Returns:
-        Dict[str, Dict[str, int]]: A dictionary where keys are spell names and values are dictionaries with spell properties
+        dict[str, dict[str, int]]: A dictionary where keys are spell names and values are dictionaries with spell properties
     """
     return {
         "Magic Missile": {"cost": 53, "damage": 4, "heal": 0, "armor": 0, "mana": 0, "duration": 0},
@@ -150,19 +139,19 @@ def get_spells() -> Dict[str, Dict[str, int]]:
         "Recharge": {"cost": 229, "damage": 0, "heal": 0, "armor": 0, "mana": 101, "duration": 5}
     }
 
-def apply_effect(state: Dict[str, int], spells: Dict[str, Dict[str, int]]) -> None:
+def apply_effect(state: dict[str, int | dict[str, int]], spells: dict[str, dict[str, int]]) -> None:
     """
     Applies the effects of active spells to the game state
 
     Args:
-        state (Dict[str, int]): The current game state containing player and boss stats, mana, and active
-        spells (Dict[str, Dict[str, int]]): A dictionary of spells with their properties
+        state (dict[str, int]): The current game state containing player and boss stats, mana, and active
+        spells (dict[str, dict[str, int]]): A dictionary of spells with their properties
 
     Returns:
         None
     """
     state["armor"] = 0
-    expired = []
+    expired: list[str] = []
 
     for name in state["effects"]:
         effect = spells[name]
@@ -179,14 +168,14 @@ def apply_effect(state: Dict[str, int], spells: Dict[str, Dict[str, int]]) -> No
     for name in expired:
         del state["effects"][name]
 
-def can_cast(state: Dict[str, int], spell_name: str, spells: Dict[str, Dict[str, int]]) -> bool:
+def can_cast(state: dict[str, int], spell_name: str, spells: dict[str, dict[str, int]]) -> bool:
     """
     Checks if a spell can be cast based on the current game state
 
     Args:
-        state (Dict[str, int]): The current game state containing player and boss stats, mana, and active
+        state (dict[str, int]): The current game state containing player and boss stats, mana, and active
         spell_name (str): The name of the spell to check
-        spells (Dict[str, Dict[str, int]]): A dictionary of spells with their properties
+        spells (dict[str, dict[str, int]]): A dictionary of spells with their properties
 
     Returns:
         bool: True if the spell can be cast, False otherwise
@@ -195,15 +184,15 @@ def can_cast(state: Dict[str, int], spell_name: str, spells: Dict[str, Dict[str,
     is_active = spell_name in state["effects"] and state["effects"][spell_name] > 1
     return state["player_mana"] >= spell["cost"] and not is_active
 
-def simulate(state: Dict[str, int], is_player_turn: bool, spells: Dict[str, Dict[str, int]], best: List[int], hard_mode: bool) -> None:
+def simulate(state: dict[str, int], is_player_turn: bool, spells: dict[str, dict[str, int]], best: list[int], hard_mode: bool) -> None:
     """
     Simulates the game state recursively to find the minimum mana spent to win
 
     Args:
-        state (Dict[str, int]): The current game state containing player and boss stats, mana, and active
+        state (dict[str, int]): The current game state containing player and boss stats, mana, and active
         is_player_turn (bool): True if it's the player's turn, False if it's the boss's turn
-        spells (Dict[str, Dict[str, int]]): A dictionary of spells with their properties
-        best (List[int]): A list containing the best (minimum) mana spent found so far
+        spells (dict[str, dict[str, int]]): A dictionary of spells with their properties
+        best (list[int]): A list containing the best (minimum) mana spent found so far
         hard_mode (bool): True if hard mode is enabled, False otherwise
 
     Returns:
@@ -276,6 +265,9 @@ def run_simulation(boss_hp: int, boss_damage: int, hard_mode: bool = False) -> i
     return best[0]
 
 def main():
+    """
+    Main function to run the simulation with puzzle input and print results for both parts
+    """
     boss_hp, boss_damage = 55, 8 # puzzle input
     print(f"Part 1: {run_simulation(boss_hp, boss_damage)}")
     print(f"Part 2: {run_simulation(boss_hp, boss_damage, hard_mode=True)}")

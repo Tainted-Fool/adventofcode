@@ -43,10 +43,8 @@ In particular, the cats and trees readings indicates that there are greater than
 What is the number of the real Aunt Sue?
 """
 import re
-from collections import defaultdict
-from typing import Dict
 
-def parse_input(filename: str) -> Dict[int, Dict[str, int]]:
+def parse_input(filename: str) -> dict[int, dict[str, int]]:
     """
     Parse the input file and return a dictionary mapping Aunt Sue profiles
 
@@ -54,25 +52,26 @@ def parse_input(filename: str) -> Dict[int, Dict[str, int]]:
         filename (str): The name of the input file
 
     Returns:
-        Dict[int, Dict[str, int]]: A dictionary where keys are Aunt Sue numbers and values are dictionaries of properties
+        dict[int, dict[str, int]]: A dictionary where keys are Aunt Sue numbers and values are dictionaries of properties
     """
     pattern = r"(\w+): (\d+),?"
-    aunts = {}
+    aunts: dict[int, dict[str, int]] = {}
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for index, line in enumerate(file, start=1):
             aunts[index] = {}
-            for prop, val in re.findall(pattern, line):
+            matches: list[tuple[str, str]] = re.findall(pattern, line)
+            for prop, val in matches:
                 aunts[index][prop] = int(val)
     return aunts
 
-def match_sue(sue_attributes: Dict[str, int], mfcsam: Dict[str, int], part_two: bool = False) -> bool:
+def match_sue(sue_attributes: dict[str, int], mfcsam: dict[str, int], part_two: bool = False) -> bool:
     """
     Determines whether a Sue attributes match the MFCSAM description
 
     Args:
-        sue_attributes (Dict[str, int]): Attributes of the Aunt Sue
-        mfcsam (Dict[str, int]): The MFCSAM reference tape
+        sue_attributes (dict[str, int]): Attributes of the Aunt Sue
+        mfcsam (dict[str, int]): The MFCSAM reference tape
         part_two (bool): If True, applies the rules for part two
 
     Returns:
@@ -95,13 +94,13 @@ def match_sue(sue_attributes: Dict[str, int], mfcsam: Dict[str, int], part_two: 
                 return False
     return True
 
-def find_sue(aunts: Dict[int, Dict[str, int]], mfcsam: Dict[str, int], part_two: bool = False) -> int:
+def find_sue(aunts: dict[int, dict[str, int]], mfcsam: dict[str, int], part_two: bool = False) -> int:
     """
     Finds the Aunt Sue that matches the MFCSAM data
 
     Args:
-        aunts (Dict[int, Dict[str, int]]): Dictionary of all Aunt Sues
-        mfcsam (Dict[str, int]): The MFCSAM reference tape
+        aunts (dict[int, dict[str, int]]): dictionary of all Aunt Sues
+        mfcsam (dict[str, int]): The MFCSAM reference tape
         part_two (bool): If True, applies the rules for part two
 
     Returns:
@@ -113,6 +112,9 @@ def find_sue(aunts: Dict[int, Dict[str, int]], mfcsam: Dict[str, int], part_two:
     return -1  # not found
 
 def main():
+    """
+    Main function to execute the solution for Day 16: Aunt Sue
+    """
     filename = "day16.txt"
     mfcsam_tape = {
         "children": 3,

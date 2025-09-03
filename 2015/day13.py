@@ -43,11 +43,11 @@ So, add yourself to the list, and give all happiness relationships that involve 
 What is the total change in happiness for the optimal seating arrangement that actually includes yourself?
 """
 import re
-from collections import defaultdict
+import copy
+# from collections import defaultdict
 from itertools import permutations
-from typing import Dict
 
-def parse_input(filename: str) -> Dict[str, Dict[str, int]]:
+def parse_input(filename: str) -> dict[str, dict[str, int]]:
     """
     Parses the input file and builds a nested dictionary of happiness values
 
@@ -55,11 +55,12 @@ def parse_input(filename: str) -> Dict[str, Dict[str, int]]:
         filename (str): The name of the input file
 
     Returns:
-        Dict[str, Dict[str, int]]: a nested dictionary of the form seating[person1][person2] = happiness
+        dict[str, dict[str, int]]: a nested dictionary of the form seating[person1][person2] = happiness
     """
-    seating = defaultdict(dict)
+    # seating: dict[str, dict[str, int]] = defaultdict(dict)
+    seating: dict[str, dict[str, int]] = {}
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
             match = re.match(r"(\w+) would (gain|lose) (\d+) happiness units by sitting next to (\w+).", line)
             if match:
@@ -67,22 +68,28 @@ def parse_input(filename: str) -> Dict[str, Dict[str, int]]:
                 happiness = int(value)
                 if action == "lose":
                     happiness = -happiness
+
+                if person1 not in seating:
+                    seating[person1] = {}
                 seating[person1][person2] = happiness
     return seating
 
-def find_happiness(seating: Dict[str, Dict[str, int]], me: bool = False) -> int:
+def find_happiness(seating: dict[str, dict[str, int]], me: bool = False) -> int:
     """
     Calculates the maximum happiness for a given seating arrangement
 
     Args:
-        seating (Dict[str, Dict[str, int]]): A nested dictionary of happiness values
+        seating (dict[str, dict[str, int]]): A nested dictionary of happiness values
         me (bool): Whether to include yourself in the seating arrangement
 
     Returns:
         int: The maximum happiness for the optimal seating arrangement
     """
+    seating = copy.deepcopy(seating)  # Create a copy to avoid modifying the original
+
     if me:
-        for person in list(seating):
+        seating["me"] = {}
+        for person in seating:
             seating[person]["me"] = 0
             seating["me"][person] = 0
 
@@ -94,6 +101,9 @@ def find_happiness(seating: Dict[str, Dict[str, int]], me: bool = False) -> int:
     return max_happiness
 
 def main():
+    """
+    Main function to read the input file and compute the required happiness values
+    """
     filename = "day13.txt"
     seating = parse_input(filename)
 

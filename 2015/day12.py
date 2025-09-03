@@ -31,43 +31,44 @@ What is the sum of all numbers in the document after ignoring "red" object?
 """
 import json
 import re
+from typing import cast
 
-def filter_red(obj: dict) -> dict:
+JSONType = int | str | list["JSONType"] | dict[str, "JSONType"]
+def filter_red(obj: dict[str, JSONType]) -> dict[str, JSONType]:
     """
     Custom object hook to remove dictionaries containing the value "red"
 
     Args:
-        obj (dict): A JSON parsed from the file
+        obj (dict[str, JSONType]): A JSON parsed from the file
 
     Returns:
-        dict: The object itself or an empty dictionary if it contains "red"
+        dict[str, JSONType]: The object itself or an empty dictionary if it contains "red"
     """
     if "red" in obj.values():
         return {}
-    else:
-        return obj
+    return obj
 
-def remove_red(obj: object) -> int:
+def remove_red(obj: JSONType) -> int:
     """
     Recursively sums all numbers in a JSON-like structure, ignoring objects with "red" values
 
     Args:
-        obj (object): The JSON-like structure (could be a list, dict, or int)
+        obj (JSONType): The JSON-like structure (could be a list, dict, or int)
 
     Returns:
         int: The sum of all numbers, ignoring objects with "red" values
     """
     text = json.dumps(obj)
     # filter_data = json.loads(text, object_hook=lambda d: {k: v for k, v in d.items() if "red" not in d.values()})
-    filter_data = json.loads(text, object_hook=filter_red)
+    filter_data = cast(JSONType, json.loads(text, object_hook=filter_red))
     return extract_numbers(filter_data)
 
-def sum_numbers(obj: object) -> int:
+def sum_numbers(obj: JSONType) -> int:
     """
     Recursively sums all numbers in a JSON-like structure, ignoring objects with "red" values
 
     Args:
-        obj (object): The JSON-like structure (could be a list, dict, or int)
+        obj (JSONType): The JSON-like structure (could be a list, dict, or int)
 
     Returns:
         int: The sum of all numbers, ignoring objects with "red" values
@@ -82,12 +83,12 @@ def sum_numbers(obj: object) -> int:
         return sum(sum_numbers(value) for value in obj.values())
     return 0
 
-def extract_numbers(data: str) -> int:
+def extract_numbers(data: JSONType) -> int:
     """
     Extracts all numbers from a JSON-like structure and returns their sum
 
     Args:
-        data (str): The JSON-like structure as a string
+        data (JSONType): The JSON-like structure as a string
 
     Returns:
         int: The sum of all numbers found in the structure
@@ -95,12 +96,16 @@ def extract_numbers(data: str) -> int:
     return sum(map(int, re.findall(r"-?\d+", json.dumps(data))))
 
 def main():
+    """
+    Main function to read the JSON file and compute the required sums
+    """
     filename = "day12.json"
-    with open(filename, "r") as file:
-        data = json.load(file)
+    with open(filename, "r", encoding="utf-8") as file:
+        data = cast(JSONType, json.load(file))
 
     print(f"Part 1: {extract_numbers(data)}")
     print(f"Part 2: {remove_red(data)}")
+    # print(f"Part 2: {sum_numbers(data)}")
 
 if __name__ == "__main__":
     main()

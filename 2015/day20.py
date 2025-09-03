@@ -35,7 +35,6 @@ The Elves decide they don't want to visit an infinite number of houses. Instead,
 
 With these changes, what is the new lowest house number of the house to get at least as many presents as the number in your puzzle input?
 """
-from typing import List
 from array import array
 
 def lowest_house_part1(target: int, search_limit: int) -> int:
@@ -93,7 +92,7 @@ def sieve_part1(target: int) -> int:
     """
     limit = 100_000
     while True:
-        presents = array('L', [0]) * (limit + 1)
+        presents = array("L", [0]) * (limit + 1)
 
         for elf in range(1, limit + 1):
             for house in range(elf, limit + 1, elf):
@@ -114,7 +113,7 @@ def sieve_part2(target: int) -> int:
     """
     limit = 100_000
     while True:
-        presents = array('L', [0]) * (limit + 1)
+        presents = array("L", [0]) * (limit + 1)
 
         for elf in range(1, limit + 1):
             last_house = min(elf * 50, limit)
@@ -125,8 +124,11 @@ def sieve_part2(target: int) -> int:
         limit *= 2
 
 def main():
+    """
+    Main function to execute the solution for both parts of the problem
+    """
     target = 33_100_000
-    limit = 1_000_000
+    # limit = 1_000_000
 
     # print(f"Part 1: {lowest_house_part1(target, limit)}")
     # print(f"Part 2: {lowest_house_part2(target, limit)}")

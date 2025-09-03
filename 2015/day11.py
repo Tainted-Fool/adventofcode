@@ -93,8 +93,7 @@ def increment_password(password: str) -> str:
         n_z = len(password) - i_z
         boundary_letter = password[i_z - 1]
         return password[:i_z - 1] + next_letter(boundary_letter) + "a" * n_z
-    else:
-        return password[:-1] + next_letter(password[-1])
+    return password[:-1] + next_letter(password[-1])
 
 def next_letter(c: str) -> str:
     """
@@ -118,16 +117,19 @@ def increment_password2(password: str) -> str:
     Returns:
         str: The incremented password
     """
-    password = list(password)
-    for i in range(len(password) - 1, -1, -1):
-        if password[i] == 'z':
-            password[i] = 'a'
+    my_password = list(password)
+    for i in range(len(my_password) - 1, -1, -1):
+        if my_password[i] == 'z':
+            my_password[i] = 'a'
         else:
-            password[i] = ascii_lowercase[ascii_lowercase.index(password[i]) + 1]
+            my_password[i] = ascii_lowercase[ascii_lowercase.index(my_password[i]) + 1]
             break
-    return "".join(password)
+    return "".join(my_password)
 
 def main():
+    """
+    Main function to run the password finding logic
+    """
     password = "hepxcrrq"
 
     print(f"Part 1: {find_next_password(password)}")

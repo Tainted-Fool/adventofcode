@@ -25,9 +25,7 @@ For example:
 
 How many total feet of ribbon should they order?
 """
-from typing import List, Tuple
-
-def get_dimensions(filepath: str) -> List[Tuple[int, int, int]]:
+def get_dimensions(filepath: str) -> list[list[int]]:
     """
     Read and parse dimensions from a file
 
@@ -35,12 +33,16 @@ def get_dimensions(filepath: str) -> List[Tuple[int, int, int]]:
         filepath (str): The filepath to read dimensions from
 
     Returns:
-        List[Tuple[int, int, int]]: A list of tuples containing the dimensions (length, width, height) of each present
+        list[list[int]]: A list containing the dimensions (length, width, height) of each present
     """
-    with open(filepath, "r") as file:
-        return [tuple(map(int, line.strip().split("x"))) for line in file]
+    with open(filepath, "r", encoding="utf-8") as file:
+        return [
+            list(map(int, parts))
+            for line in file
+            if (parts := line.strip().split("x")) and len(parts) == 3
+        ]
 
-def calculate_wrapping_paper(dimensions: Tuple[int, int, int]) -> int:
+def calculate_wrapping_paper(dimensions: list[int]) -> int:
     """
     Calculate the wrapping paper needed for a single present
     Formula:
@@ -48,7 +50,7 @@ def calculate_wrapping_paper(dimensions: Tuple[int, int, int]) -> int:
         - Slack = area of the smallest side
 
     Args:
-        dimensions (Tuple[int, int, int]): A tuple containing the dimensions (length, width, height) of the present
+        dimensions (list[int]): A list containing the dimensions (length, width, height) of the present
 
     Returns:
         int: The total square feet of wrapping paper needed for the present
@@ -57,7 +59,7 @@ def calculate_wrapping_paper(dimensions: Tuple[int, int, int]) -> int:
     sides = [length * width, width * height, height * length]
     return 2 * sum(sides) + min(sides)
 
-def calculate_ribbon(dimensions: Tuple[int, int, int]) -> int:
+def calculate_ribbon(dimensions: list[int]) -> int:
     """
     Calculate the ribbon needed for a single present
     Formula:
@@ -65,7 +67,7 @@ def calculate_ribbon(dimensions: Tuple[int, int, int]) -> int:
         - Bow = volume = l * w * h
 
     Args:
-        dimensions (Tuple[int, int, int]): A tuple containing the dimensions (length, width, height) of the present
+        dimensions (list[int]): A list containing the dimensions (length, width, height) of the present
 
     Returns:
         int: The total feet of ribbon needed for the present
@@ -74,6 +76,9 @@ def calculate_ribbon(dimensions: Tuple[int, int, int]) -> int:
     return 2 * (length + width) + (length * width * height)
 
 def main():
+    """
+    Main function to read dimensions from a file and calculate total wrapping paper and ribbon needed
+    """
     filename = "day2.txt"
 
     dimensions_list = get_dimensions(filename)

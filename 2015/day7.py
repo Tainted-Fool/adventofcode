@@ -45,9 +45,9 @@ In little Bobby's kit's instructions booklet (provided as your puzzle input), wh
 Now, take the signal you got on wire a, override wire b to that signal, and reset the other wires (including wire a). What new signal is ultimately provided to wire a?
 """
 from functools import lru_cache
-from typing import Dict, List
+from typing import Callable
 
-def parse_instructions(filename: str) -> Dict[str, List[str]]:
+def parse_instructions(filename: str) -> dict[str, list[str]]:
     """
     Parses circuit instructions from a file into a dictionary structure
 
@@ -59,13 +59,13 @@ def parse_instructions(filename: str) -> Dict[str, List[str]]:
         filename (str): The path to the input file containing wire instructions
 
     Returns:
-        Dict[str, List[str]]: A dictionary mapping wire names to their operations
+        dict[str, list[str]]: A dictionary mapping wire names to their operations
     """
-    instructions = {}
-    with open(filename, 'r') as file:
+    instructions: dict[str, list[str]] = {}
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
-            if '->' in line:
-                left_side, wire = line.strip().split(' -> ')
+            if "->" in line:
+                left_side, wire = line.strip().split(" -> ")
                 instructions[wire] = left_side.split()
     return instructions
         # return {
@@ -74,7 +74,7 @@ def parse_instructions(filename: str) -> Dict[str, List[str]]:
         #     for operation, result in [line.strip().split('->')]
         # }
 
-def build_calculator(instructions: Dict[str, List[str]]) -> Dict[str, int]:
+def build_calculator(instructions: dict[str, list[str]]) -> Callable[[str], int]:
     """
     Creates a cached calculator function for computing the signal on a given wire
 
@@ -84,7 +84,7 @@ def build_calculator(instructions: Dict[str, List[str]]) -> Dict[str, int]:
     OR, LSHIFT, and RSHIFT), ensuring that the results conform to the 16-bit constraint
 
     Args:
-        instructions (Dict[str, List[str]]): A dictionary mapping wire identifiers to a list of operation
+        instructions (dict[str, list[str]]): A dictionary mapping wire identifiers to a list of operation
             components. Each value represents an operation in the form of a list of strings,
             describing how to compute the signal for that wire
 
@@ -110,41 +110,43 @@ def build_calculator(instructions: Dict[str, List[str]]) -> Dict[str, int]:
             int: The computed 16-bit signal
         """
         try:
-            return int(wire)  # Direct number assignment 
+            return int(wire)  # Direct number assignment
         except ValueError:
             pass
 
         operation = instructions[wire]
         if len(operation) == 1:  # Direct wire assignment
             return calculate(operation[0])
-        elif operation[0] == 'NOT':  # Unary operation
+        if operation[0] == "NOT":  # Unary operation
             return ~calculate(operation[1]) & 0xFFFF
-        else:
-            left_operand, operator, right_operand = operation
+        left_operand, operator, right_operand = operation
 
-            operations = {  # Binary operations
-                'AND': lambda x, y: x & y,
-                'OR': lambda x, y: x | y,
-                # 'NOT': lambda x, _: ~x & 0xFFFF,
-                'RSHIFT': lambda x, y: x >> y,
-                'LSHIFT': lambda x, y: x << y,
-                # 'LSHIFT': lambda x, y: (x << y) & 0xFFFF  # Maintain 16-bit result,
-            }
-            return operations[operator](calculate(left_operand), calculate(right_operand))
+        operations: dict[str, Callable[[int, int], int]] = {  # Binary operations
+            "AND": lambda x, y: x & y,
+            "OR": lambda x, y: x | y,
+            # "NOT": lambda x, _: ~x & 0xFFFF,
+            "RSHIFT": lambda x, y: x >> y,
+            "LSHIFT": lambda x, y: x << y,
+            # "LSHIFT": lambda x, y: (x << y) & 0xFFFF  # Maintain 16-bit result,
+        }
+        return operations[operator](calculate(left_operand), calculate(right_operand))
     return calculate
 
 def main():
-    filename = 'day7.txt'
+    """
+    Main function to execute the circuit assembly and signal calculation
+    """
+    filename = "day7.txt"
 
     instructions = parse_instructions(filename)
     calculate = build_calculator(instructions)
 
-    part1 = calculate('a')
-    print(f'Part 1: {part1}')
+    part1 = calculate("a")
+    print(f"Part 1: {part1}")
 
-    instructions['b'] = [str(part1)]
+    instructions["b"] = [str(part1)]
     calculate = build_calculator(instructions)  # Rebuild the calculator with updated instructions
-    print(f'Part 2: {calculate('a')}')
+    print(f"Part 2: {calculate('a')}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

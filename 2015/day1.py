@@ -33,7 +33,7 @@ For example:
 
 What is the position of the character that causes Santa to first enter the basement?
 """
-from typing import Generator, Tuple
+from collections.abc import Generator
 
 def read_char(filepath: str) -> Generator[str, None, None]:
     """
@@ -45,11 +45,11 @@ def read_char(filepath: str) -> Generator[str, None, None]:
     Returns:
         Generator[str, None, None]: A generator yielding each character in the file
     """
-    with open(filepath, "r") as file:
+    with open(filepath, "r", encoding="utf-8") as file:
         while char := file.read(1):
             yield char
 
-def calculate_floor_and_basement(directions: str) -> Tuple[int, int]:
+def calculate_floor_and_basement(directions: str) -> tuple[int, int | None]:
     """
     Calculate the final floor and the position of the first basement entry
 
@@ -57,7 +57,7 @@ def calculate_floor_and_basement(directions: str) -> Tuple[int, int]:
         directions (str): A string of parentheses `(` or `)` representing the directions
 
     Returns:
-        Tuple[int, int]: A tuple containing the final floor and the position of the first basement entry
+        tuple[int, int | None]: A tuple containing the final floor and the position of the first basement entry
     """
     floor, basement_position = 0, None
     for position, char in enumerate(directions, start=1):
@@ -68,9 +68,12 @@ def calculate_floor_and_basement(directions: str) -> Tuple[int, int]:
     return floor, basement_position
 
 def main():
+    """
+    Main function to read input and calculate results for Day 1 of Advent of Code 2015
+    """
     filename = "day1.txt"
 
-    with open(filename, "r") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         directions = file.read().strip()
 
     final_floor, basement_position = calculate_floor_and_basement(directions)

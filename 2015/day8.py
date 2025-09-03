@@ -33,10 +33,10 @@ For example:
 
 Your task is to find the total number of characters to represent the newly encoded strings minus the number of characters of code in each original string literal. For example, for the strings above, the total encoded length (6 + 9 + 16 + 11 = 42) minus the characters in the original code representation (23, just like in the first part of this puzzle) is 42 - 23 = 19.
 """
-import re
-from typing import Tuple
+import ast
+from typing import cast
 
-def compute_lengths(line: str) -> Tuple[int, int, int]:
+def compute_lengths(line: str) -> tuple[int, int, int]:
     """
     Compute the code, memory, and encoded lengths for a string literal
 
@@ -44,7 +44,7 @@ def compute_lengths(line: str) -> Tuple[int, int, int]:
         line (str): The raw string
 
     Returns:
-        Tuple[int, int, int]: A tuple containing the code length, memory length, and encoded length
+        tuple[int, int, int]: A tuple containing the code length, memory length, and encoded length
             - code length is the length of the string literal
             - memory length is the length of the string when evaluated
             - encoded length is the length of the string after re-encoding
@@ -52,37 +52,40 @@ def compute_lengths(line: str) -> Tuple[int, int, int]:
     line = line.strip() # remove any surrounding whitespace and newline
     code_length = len(line) # length of the string literal
 
-    # string loaded in memory - eval interprets the escape sequences like \" and \x27
-    memory_length = len(eval(line))
+    # string loaded in memory - literal_eval interprets the escape sequences like \" and \x27
+    memory_length = len(cast(list[str], ast.literal_eval(line)))
 
     encoded_length = 2 # begin with 2 extra characters for the surrounding quotes
     for char in line:
         # each backslash or double quote in the original string needs to be escaped in the encoded string
-        if char == '\\' or char == '"':
+        if char in ("\\", '"'):
             encoded_length += 2
         else:
             encoded_length += 1
     return code_length, memory_length, encoded_length
 
 def main():
+    """
+    Main function to read the input file and compute the required lengths
+    """
     total_code = 0
     total_memory = 0
     total_encoded = 0
-    filename = 'day8.txt'
+    filename = "day8.txt"
 
-    with open(filename, 'r') as file:
+    with open(filename, "r", encoding="utf-8") as file:
         for line in file:
             code, memory, encoded = compute_lengths(line)
             total_code += code
             total_memory += memory
             total_encoded += encoded
 
-    print(f'Part 1: {total_code - total_memory}')
-    print(f'Part 2: {total_encoded - total_code}')
+    print(f"Part 1: {total_code - total_memory}")
+    print(f"Part 2: {total_encoded - total_code}")
 
     # one-line solutions
     # print(f"Part 1: {sum(len(line[:-1]) - len(eval(line)) for line in open(filename, 'r'))}")
     # print(f"Part 2: {sum(2 + line.count('\\') + line.count('"') for line in open(filename, 'r'))}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
