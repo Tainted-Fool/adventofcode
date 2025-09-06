@@ -18,10 +18,94 @@ For example:
     R5, L5, R5, R3 leaves you 12 blocks away.
 
 How many blocks away is Easter Bunny HQ?
+
+--- Part Two ---
+
+Then, you notice the instructions continue on the back of the Recruiting Document. Easter Bunny HQ is actually at the first location you visit twice.
+
+For example, if your instructions are R8, R4, R4, R8, the first location you visit twice is 4 blocks away, due East.
+
+How many blocks away is the first location you visit twice?
 """
 
+def parse_data(filename: str) -> list[tuple[str, int]]:
+    """
+    Parse the input data from the given filename
+
+    Args:
+        filename (str): The name of the file containing the input data
+
+    Returns:
+        list[tuple[str, int]]: A list of tuples containing the direction and distance
+    """
+    with open(filename, "r", encoding="utf-8") as file:
+        data = file.read().strip().split(", ")
+    return [(d[0], int(d[1:])) for d in data]
+
+def get_distance(directions: list[tuple[str, int]]) -> int:
+    """
+    Calculate the distance from the starting point after following the given directions
+
+    Args:
+        directions (list[tuple[str, int]]): A list of tuples containing the direction and distance
+
+    Returns:
+        int: The distance from the starting point
+    """
+    x, y = 0, 0  # Starting coordinates
+    for turn, steps in directions:
+        if turn == "R":
+            x, y = -y, x
+        else:
+            x, y = y, -x
+        x += steps
+    return abs(x) + abs(y)
+
+def get_first_revisited_distance(directions: list[tuple[str, int]]) -> int:
+    """
+    Calculate the distance to the first location that is visited twice
+
+    Args:
+        directions (list[tuple[str, int]]): A list of tuples containing the direction and distance
+
+    Returns:
+        int: The distance to the first location that is visited twice
+    """
+    x, y = 0, 0  # Starting coordinates
+    visited: set[tuple[int, int]] = set()
+    visited.add((x, y))
+    direction_index = 0  # Facing north
+    direction_map = [
+        (0, 1),  # North
+        (1, 0),  # East
+        (0, -1),  # South
+        (-1, 0),  # West
+    ]
+
+    for turn, steps in directions:
+        if turn == "R":
+            direction_index = (direction_index + 1) % 4
+        else:
+            direction_index = (direction_index - 1) % 4
+        dx, dy = direction_map[direction_index]
+
+        for _ in range(steps):
+            x += dx
+            y += dy
+            if (x, y) in visited:
+                return abs(x) + abs(y)
+            visited.add((x, y))
+    return -1  # If no location is visited twice
+
 def main():
-    pass
+    """
+    Main function to execute the code
+    """
+    filename = "day1.txt"
+    directions = parse_data(filename)
+
+    print(f"Part 1: {get_distance(directions)}")
+    print(f"Part 2: {get_first_revisited_distance(directions)}")
 
 if __name__ == "__main__":
     main()
